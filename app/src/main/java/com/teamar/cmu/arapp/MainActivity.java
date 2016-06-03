@@ -2,6 +2,9 @@ package com.teamar.cmu.arapp;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -29,7 +32,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private ArchitectView architectView;
     protected Location lastKnownLocaton;
     protected Location poiLocation;
-    Button bLoc;
+    Button bLoc, bPOIs;
 
 
     protected double latitude = 40.458438;
@@ -50,6 +53,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     private LocationRequest mLocationRequest;
 
+
+
     // Location updates intervals in sec
     private static int UPDATE_INTERVAL = 10000; // 10 sec
     private static int FATEST_INTERVAL = 5000; // 5 sec
@@ -65,6 +70,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         poiLocation.setLatitude(latitude);
         poiLocation.setLongitude(longitude);
         bLoc = (Button) findViewById(R.id.buttonLocation);
+        bPOIs = (Button) findViewById(R.id.buttonPOIs);
         // Here, thisActivity is the current activity
         if (ContextCompat.checkSelfPermission(MainActivity.this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
@@ -103,9 +109,24 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(MainActivity.this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
-            this.architectView = (ArchitectView) this.findViewById(R.id.architectView);
-            final StartupConfiguration config = new StartupConfiguration("N78dKe/7vwHCJYIW2k0heOaNYyIE5EX2NiBrtYJhFMAaEBLdX0RrD7WoYMfKLlr0czbU5IL6Jl54+VmCFcp4/aKVIozWqGe2FvoFLHhEhkxopx3qZeDkLQ+fKoLBZQ79A+3UXn9FBxSg8aE3hRdcyww80nTy3pKV1lzDT02GKfdTYWx0ZWRfX02mWSHVrgDw49S/vdK7jaaJqdRKfADZwA81pc62IoswUzkEuPe8l6Nle8EsCOs9eU1j+hFSz0FT5gY/zunGpEihbdLtR6bTGnp+Qy18PbeIQZrP2NHAVPl/ksaBVx1BWMt6xmorTmrFICITgDYFFyUPCIBLpo7ZrdErZA25Oi3nmtskFnxNlyGLij4lOCEV6phC7xDbItlSmtNG3pYxurRqfbC18Z2/deIYR07aRRHYloD1JKPn4BT5dbJxwsUhsFJvtkrVPFXYqM0+MJveDgZD3LuovqhX/EFIWzhK3E9w55sbP+p+UgFUDaaH8D7VLtyN4D1P2QO5WnaKPIzchn1njnECeF6JuN0mRAQ1Y0HfpLaCInLAA4RH/6zHvx0jzC/AtKZMBHgtbrznLEmqS757FYvkf+jEuDPY1ISUzyPQ4JHQM8eaD1eGGT+UfgV9AkhKddTHIeXuv9iL0L7aE8OTXZD19H6BhNq/1JG1mMvdyo10z85fLO4=");
-            this.architectView.onCreate(config);
+            try {
+                this.architectView = (ArchitectView) this.findViewById(R.id.architectView);
+                final StartupConfiguration config = new StartupConfiguration("N78dKe/7vwHCJYIW2k0heOaNYyIE5EX2NiBrtYJhFMAaEBLdX0RrD7WoYMfKLlr0czbU5IL6Jl54+VmCFcp4/aKVIozWqGe2FvoFLHhEhkxopx3qZeDkLQ+fKoLBZQ79A+3UXn9FBxSg8aE3hRdcyww80nTy3pKV1lzDT02GKfdTYWx0ZWRfX02mWSHVrgDw49S/vdK7jaaJqdRKfADZwA81pc62IoswUzkEuPe8l6Nle8EsCOs9eU1j+hFSz0FT5gY/zunGpEihbdLtR6bTGnp+Qy18PbeIQZrP2NHAVPl/ksaBVx1BWMt6xmorTmrFICITgDYFFyUPCIBLpo7ZrdErZA25Oi3nmtskFnxNlyGLij4lOCEV6phC7xDbItlSmtNG3pYxurRqfbC18Z2/deIYR07aRRHYloD1JKPn4BT5dbJxwsUhsFJvtkrVPFXYqM0+MJveDgZD3LuovqhX/EFIWzhK3E9w55sbP+p+UgFUDaaH8D7VLtyN4D1P2QO5WnaKPIzchn1njnECeF6JuN0mRAQ1Y0HfpLaCInLAA4RH/6zHvx0jzC/AtKZMBHgtbrznLEmqS757FYvkf+jEuDPY1ISUzyPQ4JHQM8eaD1eGGT+UfgV9AkhKddTHIeXuv9iL0L7aE8OTXZD19H6BhNq/1JG1mMvdyo10z85fLO4=");
+                this.architectView.onCreate(config);
+            }
+            catch (Exception e)
+            {
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+                alertDialogBuilder.setMessage("Error opening up camera");
+                alertDialogBuilder.setNegativeButton("Close", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        finish();
+                    }
+                });
+                AlertDialog alertDialog = alertDialogBuilder.create();
+                alertDialog.show();
+            }
         }
 
 
@@ -121,6 +142,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             buildGoogleApiClient();
         }
 
+        bPOIs.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(MainActivity.this, ListPOIActivity.class);
+                startActivity(i);
+            }
+        });
         bLoc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
