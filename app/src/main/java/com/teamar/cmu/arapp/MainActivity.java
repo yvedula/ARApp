@@ -38,6 +38,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     protected double latitude = 40.458438;
     protected double longitude = -79.928995;
 
+    String imageToRender = "4c9aLKBKi.jpeg";
     // LogCat tag
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -156,8 +157,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 try {
                     architectView.setLocation(mLastLocation.getLatitude(), mLastLocation.getLongitude(), 1f);
                     Toast.makeText(MainActivity.this, ""+mLastLocation.distanceTo(poiLocation), Toast.LENGTH_SHORT).show();
-                    if(mLastLocation.distanceTo(poiLocation) < 150)
-                        architectView.load("file:///android_asset/2D_rendering/index.html");
+                    if(mLastLocation.distanceTo(poiLocation) < 15000)
+                        architectView.load("file:///android_asset/2D_rendering/index.html?url='"+imageToRender+"'");
                     else
                         architectView.load("file:///android_asset/selecting/index.html?lat="+poiLocation.getLatitude()+"&lon="+poiLocation.getLongitude());
                     //Toast.makeText(MainActivity.this, "Asset Loaded", Toast.LENGTH_SHORT).show();

@@ -1,3 +1,6 @@
+/**
+ * TeamAR
+ */
 package com.teamar.cmu.arapp;
 
 /**
@@ -18,25 +21,62 @@ import com.android.volley.toolbox.HurlStack;
  */
 public final class CustomVolleyRequestQueue {
 
+
+    /**
+     * Defining the size of the request queue cache in MB.
+     */
+    static final int CACHE_IN_MB = 10;
+
+    /**
+     * Since the parameter of the DiskBasedCache constructor
+     * requires cache size in bytes, we use this constant to convert.
+     */
+    static final int BYTE_UPGRADE_CONSTANT = 1024;
+
+    /**
+     * Declaring an instance of the CustomVolleyRequestQueue class.
+     */
     private static CustomVolleyRequestQueue mInstance;
+
+    /**
+     * Declaring a global variable for storing the context of the activity.
+     */
     private static Context mCtx;
+    /**
+     * Declaring an instance of the RequestQueue class.
+     */
     private RequestQueue mRequestQueue;
 
-    private CustomVolleyRequestQueue(Context context) {
+    /**
+     * Constructor for the current class.
+     * @param context : Accepts the context of the activity
+     *               invoking methods from this class.
+     */
+    private CustomVolleyRequestQueue(final Context context) {
         mCtx = context;
         mRequestQueue = getRequestQueue();
     }
 
-    public static synchronized CustomVolleyRequestQueue getInstance(Context context) {
+    /**
+     *
+     * @param context : Accepts the context of the
+     *               activity invoking the getInstance method.
+     * @return mInstance
+     */
+    public static synchronized CustomVolleyRequestQueue getInstance(final Context context) {
         if (mInstance == null) {
             mInstance = new CustomVolleyRequestQueue(context);
         }
         return mInstance;
     }
 
+    /**
+     * Function to retrieve the request queue.
+     * @return mRequestQueue
+     */
     public RequestQueue getRequestQueue() {
         if (mRequestQueue == null) {
-            Cache cache = new DiskBasedCache(mCtx.getCacheDir(), 10 * 1024 * 1024);
+            Cache cache = new DiskBasedCache(mCtx.getCacheDir(), CACHE_IN_MB * BYTE_UPGRADE_CONSTANT * BYTE_UPGRADE_CONSTANT);
             Network network = new BasicNetwork(new HurlStack());
             mRequestQueue = new RequestQueue(cache, network);
             // Don't forget to start the volley request queue

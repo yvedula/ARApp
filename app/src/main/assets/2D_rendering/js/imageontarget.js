@@ -1,4 +1,21 @@
 var beginsTime;
+var serverURL = "http://www.clipartbest.com/cliparts/4c9/aLK/"
+function $_GET(param) {
+	var vars = {};
+	window.location.href.replace( location.hash, '' ).replace(
+		/[?&]+([^=&]+)=?([^&]*)?/gi, // regexp
+		function( m, key, value ) { // callback
+			vars[key] = value !== undefined ? value : '';
+		}
+	);
+
+	if ( param ) {
+		return vars[param] ? vars[param] : null;
+	}
+	return vars;
+}
+
+var imgSource = $_GET('url');
 var World = {
 	loaded: false,
 
@@ -29,38 +46,20 @@ var World = {
 		this.tracker = new AR.ClientTracker("assets/magazine.wtc", {
 			onLoaded: this.worldLoaded
 		});
-		lat = 40.444265;
-		lon = -79.942840;
-		this.createMarker = function(lat, lon, name) {
-            var loc = new AR.GeoLocation(lat, lon);
-            var imageDrawable = new AR.ImageDrawable(this.res.marker, 2, {
-                scale: 0.0,
-                onClick: function() {
-                    alert("clicked");
-                }
-            });
 
-            this.markerAnimations.push(new AR.PropertyAnimation(imageDrawable, 'scale', 0.0, 1.0, 1000, {
-                    type: AR.CONST.EASING_CURVE_TYPE.EASE_OUT_BOUNCE
-                }));
-                this.stores.push(new AR.GeoObject(loc, {
-                    drawables: {
-                        cam: imageDrawable
-                    },
-                    enabled: false
-                }));
-                };
 		/*
 			The next step is to create the augmentation. In this example an image resource is created and passed to the AR.ImageDrawable. A drawable is a visual component that can be connected to an IR target (AR.Trackable2DObject) or a geolocated object (AR.GeoObject). The AR.ImageDrawable is initialized by the image and its size. Optional parameters allow for position it relative to the recognized target.
 		*/
 
 		/* Create overlay for page one */
-		var imgOne = new AR.ImageResource("assets/imageOne.png");
-//		var imgOne = new AR.ImageResource("assets/maxresdefault.jpg");
+//		var imgOne = new AR.ImageResource("assets/imageOne.png");
+		//var imgOne = new AR.ImageResource("assets/maxresdefault.jpg");
+
+		var imgOne = new AR.ImageResource(serverURL+imgSource);
 		//var imgOne = new AR.ImageResource("assets/retina.jpg");
 		//var imgOne = new AR.ImageResource("http://www.planwallpaper.com/static/images/blue_ocean-dsc00251-1080p.jpg");
 
-		var overlayOne = new AR.ImageDrawable(imgOne, 1, {
+		var overlayOne = new AR.ImageDrawable(imgOne, 3, {
 			offsetX: -0.15,
 			offsetY: 0
 		});
@@ -77,6 +76,10 @@ var World = {
 	},
 
 	worldLoaded: function worldLoadedFn() {
+		var completedTime = Date.now();
+		var loadTime = completedTime - beginsTime;
+		console.log('Render complete at: '+completedTime);
+		console.log('Time taken: '+loadTime);
 		var cssDivLeft = " style='display: table-cell;vertical-align: middle; text-align: right; width: 50%; padding-right: 15px;'";
 		var cssDivRight = " style='display: table-cell;vertical-align: middle; text-align: left;'";
 		document.getElementById('loadingMessage').innerHTML =
