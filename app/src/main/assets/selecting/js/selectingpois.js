@@ -77,7 +77,8 @@ var World = {
 		//World.updateStatusMessage(currentPlaceNr + ' places loaded');
 		//World.updateStatusMessage('URL: '+window.location.href.indexOf("lat") );
 		setDestination();
-		World.updateStatusMessage('Location: '+lat1+', '+lon1 );
+//		World.updateStatusMessage('Location: '+lat1+', '+lon1 );
+		World.updateStatusMessage( 'Distance '+markerList[0].distanceToUser());
 	},
 
 	// updates status message shon in small "i"-button aligned bottom center

@@ -3,11 +3,15 @@ package com.teamar.cmu.arapp;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.location.LocationListener;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -26,37 +30,94 @@ import com.google.android.gms.location.LocationServices;
 import com.wikitude.architect.ArchitectView;
 import com.wikitude.architect.StartupConfiguration;
 
+import java.io.IOException;
+import java.io.InputStream;
+
+/**
+ * MainActivity : The activity responsible for launching a particular AR task.
+ */
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
+    /**
+     * The view for the Wikitude camera feed.
+     */
     private ArchitectView architectView;
-    protected Location lastKnownLocaton;
+    /**
+     * Variable to store the last known location of the device.
+     */
+    protected Location lastKnownLocation;
+    /**
+     * Variable to store the location of the POI to be visited.
+     */
     protected Location poiLocation;
-    Button bLoc, bPOIs;
+    /**
+     * Button to display the device's current location.
+     */
+    private Button bLoc;
+    /**
+     * Button to switch activities to ListPOIActivity.
+     */
+    private Button bPOIs;
 
+    /**
+     * Button to view AR content.
+     */
+    private Button bViewAR;
+    /**
+     * Variable to store the latitude of the POI.
+     */
+    protected double latitude = 40.444410;
 
-    protected double latitude = 40.458438;
-    protected double longitude = -79.928995;
+    /**
+     * Variable to store the longitude of the POI.
+     */
+    protected double longitude = -79.942805;
 
-    String imageToRender = "4c9aLKBKi.jpeg";
-    // LogCat tag
+    /**
+     * Variable to store the URL of the image to be retrieved.
+     */
+    String imageToRender = "http://www.clipartbest.com/cliparts/4c9/aLK/4c9aLKBKi.jpeg";
+    String imageToRender1 = "4c9aLKBKi.jpeg";
+
+    /**
+     * Logcat tag.
+     */
     private static final String TAG = MainActivity.class.getSimpleName();
 
+    /**
+     * Variable to store the the number of services being resolved.
+     */
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 1000;
+
+    /**
+     * Variable to store the last known location of the device.
+     */
 
     private Location mLastLocation;
 
-    // Google client to interact with Google API
+    /**
+     * Google client to interact with Google API.
+     */
     private GoogleApiClient mGoogleApiClient;
 
-    // boolean flag to toggle periodic location updates
+    /**
+     * Boolean flag to toggle periodic location updates
+     */
+
     private boolean mRequestingLocationUpdates = false;
 
+    /**
+     * LocationRequest object.
+     */
     private LocationRequest mLocationRequest;
 
 
+    /**
+     * Location updates intervals in seconds
+     */
 
-    // Location updates intervals in sec
+    ProgressDialog mProgressDialog;
     private static int UPDATE_INTERVAL = 10000; // 10 sec
     private static int FATEST_INTERVAL = 5000; // 5 sec
     private static int DISPLACEMENT = 10; // 10 meters
@@ -72,6 +133,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         poiLocation.setLongitude(longitude);
         bLoc = (Button) findViewById(R.id.buttonLocation);
         bPOIs = (Button) findViewById(R.id.buttonPOIs);
+        bViewAR = (Button) findViewById(R.id.bViewAR);
         // Here, thisActivity is the current activity
         if (ContextCompat.checkSelfPermission(MainActivity.this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
@@ -143,6 +205,17 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             buildGoogleApiClient();
         }
 
+        bViewAR.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    new DownloadImage().execute(imageToRender);
+                    architectView.load("file:///android_asset/2D_rendering/index.html?url='"+imageToRender1+"'");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
         bPOIs.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -156,11 +229,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 displayLocation();
                 try {
                     architectView.setLocation(mLastLocation.getLatitude(), mLastLocation.getLongitude(), 1f);
-                    Toast.makeText(MainActivity.this, ""+mLastLocation.distanceTo(poiLocation), Toast.LENGTH_SHORT).show();
-                    if(mLastLocation.distanceTo(poiLocation) < 15000)
-                        architectView.load("file:///android_asset/2D_rendering/index.html?url='"+imageToRender+"'");
-                    else
-                        architectView.load("file:///android_asset/selecting/index.html?lat="+poiLocation.getLatitude()+"&lon="+poiLocation.getLongitude());
+                    architectView.load("file:///android_asset/radar/index.html?lat=" + poiLocation.getLatitude() + "&lon=" + poiLocation.getLongitude());
                     //Toast.makeText(MainActivity.this, "Asset Loaded", Toast.LENGTH_SHORT).show();
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -224,6 +293,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         try {
+            //architectView.setLocation(mLastLocation.getLatitude(), mLastLocation.getLongitude(), 1f);
             architectView.onPostCreate();
         }
         catch (Exception e)
@@ -352,8 +422,20 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     @Override
-    public void onLocationChanged(Location location) {
+    public void onLocationChanged(Location location)
+    {
         mLastLocation = location;
+        try {
+            if (mLastLocation.distanceTo(poiLocation) < 15)
+                architectView.load("file:///android_asset/2D_rendering/index.html?url='" + imageToRender + "'");
+            else
+                architectView.load("file:///android_asset/selecting/index.html?lat=" + poiLocation.getLatitude() + "&lon=" + poiLocation.getLongitude());
+            //Toast.makeText(MainActivity.this, "Asset Loaded", Toast.LENGTH_SHORT).show();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -369,5 +451,50 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     public void onProviderDisabled(String provider) {
 
+    }
+
+
+    // DownloadImage AsyncTask
+    private class DownloadImage extends AsyncTask<String, Void, Bitmap> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            // Create a progressdialog
+            mProgressDialog = new ProgressDialog(MainActivity.this);
+            // Set progressdialog title
+            mProgressDialog.setTitle("Download Image Tutorial");
+            // Set progressdialog message
+            mProgressDialog.setMessage("Loading...");
+            mProgressDialog.setIndeterminate(false);
+            // Show progressdialog
+            mProgressDialog.show();
+        }
+
+        @Override
+        protected Bitmap doInBackground(String... URL) {
+
+            String imageURL = URL[0];
+
+            Bitmap bitmap = null;
+            try {
+                // Download Image from URL
+                InputStream input = new java.net.URL(imageURL).openStream();
+                // Decode Bitmap
+                bitmap = BitmapFactory.decodeStream(input);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return bitmap;
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap result) {
+            // Set the bitmap into ImageView
+            //image.setImageBitmap(result);
+            displayToast("Image Downloaded!");
+            // Close progressdialog
+            mProgressDialog.dismiss();
+        }
     }
 }

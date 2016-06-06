@@ -12,7 +12,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Where am I?"
+        android:text="Locate POI"
         android:id="@+id/buttonLocation"
         android:layout_alignBottom="@+id/architectView"
         android:layout_alignRight="@+id/architectView"
@@ -26,5 +26,13 @@
         android:layout_alignBottom="@+id/architectView"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="View AR"
+        android:id="@+id/bViewAR"
+        android:layout_alignBottom="@+id/architectView"
+        android:layout_centerHorizontal="true" />
 
 </RelativeLayout>

@@ -52,10 +52,10 @@ var World = {
 		*/
 
 		/* Create overlay for page one */
-//		var imgOne = new AR.ImageResource("assets/imageOne.png");
+        var imgOne = new AR.ImageResource("assets/imageOne.png");
 		//var imgOne = new AR.ImageResource("assets/maxresdefault.jpg");
 
-		var imgOne = new AR.ImageResource(serverURL+imgSource);
+		//var imgOne = new AR.ImageResource(serverURL+imgSource);
 		//var imgOne = new AR.ImageResource("assets/retina.jpg");
 		//var imgOne = new AR.ImageResource("http://www.planwallpaper.com/static/images/blue_ocean-dsc00251-1080p.jpg");
 
