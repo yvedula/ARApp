@@ -1,105 +1,165 @@
 package com.teamar.cmu.arapp;
 
+import android.app.ListActivity;
+import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.JsonArrayRequest;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 
-public class ListPOIActivity extends ActionBarActivity implements Response.Listener,
-        Response.ErrorListener {
+public class ListPOIActivity extends ListActivity {
+
+   // private RequestQueue mQueue;
+
+
+    // Progress dialog
+    private ProgressDialog pDialog;
+
+    ArrayList<POI> poiList = new ArrayList<POI>();
+
     public static final String REQUEST_TAG = "ListPOIActivity";
-    private TextView mTextView;
-    private Button mButton;
-    private RequestQueue mQueue;
-    CustomJSONObjectRequest jsonRequest = null;
-    WebServiceRequest webServiceRequest;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_poi);
 
-        mTextView = (TextView) findViewById(R.id.textView);
-        mButton = (Button) findViewById(R.id.button);
+        POI fence = new POI("Fence");
+        POI gates = new POI("Gates");
+        POI nsh = new POI("NSH");
 
-        webServiceRequest = new WebServiceRequest();
+        pDialog = new ProgressDialog(this);
+        pDialog.setMessage("Please wait...");
+        pDialog.setCancelable(false);
+
+
+
+
+
+
+       // makeRequest("http://jsonplaceholder.typicode.com/posts", mQueue, jsonRequest);
     }
+
+    protected void onListItemClick(ListView l, View v, int position, long id) {
+        String item = (String) getListAdapter().getItem(position);
+        Intent intent = new Intent(this, POIDescription.class);
+        intent.putExtra("poi_name", item);
+        startActivity(intent);
+    }
+
+
 
     @Override
     protected void onStart() {
         super.onStart();
-//        mQueue = CustomVolleyRequestQueue.getInstance(this.getApplicationContext())
-//                .getRequestQueue();
-//        String url = "http://api.androidhive.info/volley/person_object.json";
-//        //String url = "http://jsonplaceholder.typicode.com/posts";
-//        final CustomJSONObjectRequest jsonRequest = new CustomJSONObjectRequest(Request.Method
-//                .GET, url,
-//                new JSONObject(), this, this);
-//        jsonRequest.setTag(REQUEST_TAG);
 
-//        makeRequest("http://api.androidhive.info/volley/person_object.json");
-        mButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                makeRequest("http://api.androidhive.info/volley/person_object.json", mQueue, jsonRequest);
+        String url = "https://example.wikitude.com/GetSamplePois/";
+        makeJsonArrayRequest(url);
 
-            }
-        });
+               // mQueue.add(jsonRequest);
+
     }
-
 
     @Override
     protected void onStop() {
         super.onStop();
-        if (mQueue != null) {
-            mQueue.cancelAll(REQUEST_TAG);
-        }
+
     }
 
-    @Override
-    public void onErrorResponse(VolleyError error) {
-        mTextView.setText(error.getMessage());
+
+
+    /**
+     * Method to make json array request where response starts with [
+     * */
+    private void makeJsonArrayRequest(String urlJsonArry) {
+
+        showpDialog();
+
+        JsonArrayRequest req = new JsonArrayRequest(urlJsonArry,
+                new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        Log.d("TAG", response.toString());
+
+                        try {
+                            // Parsing json array response
+                            // loop through each json object
+                            String jsonResponse = "";
+                            String[] poiNames = new String[response.length()];
+                            for (int i = 0; i < response.length(); i++) {
+
+                                JSONObject person = (JSONObject) response
+                                        .get(i);
+
+                                String name = person.getString("name");
+
+                                String description = person.getString("description");
+                                String id = person.getString("id");
+
+                                poiList.add(new POI(name));
+                                poiNames[i] = name;
+                                jsonResponse += "Name: " + name + "\n\n";
+                                jsonResponse += "Description: " + description + "\n\n";
+                                jsonResponse += "ID: " + id + "\n\n\n";
+
+                                ArrayAdapter<String> adapter = new ArrayAdapter<String>
+                                        (ListPOIActivity.this, android.R.layout.simple_list_item_1, poiNames);
+                                setListAdapter(adapter);
+
+                            }
+
+                            //displayToast(jsonResponse);
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            Toast.makeText(getApplicationContext(),
+                                    "Error: " + e.getMessage(),
+                                    Toast.LENGTH_LONG).show();
+                        }
+
+                        hidepDialog();
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.d("TAG", "Error: " + error.getMessage());
+                Toast.makeText(getApplicationContext(),
+                        error.getMessage(), Toast.LENGTH_SHORT).show();
+                hidepDialog();
+            }
+        });
+
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(req);
     }
 
-    @Override
-    public void onResponse(Object response) {
-       // mTextView.setText("Response is: " + response);
-        try {
-            mTextView.setText(parseJSON("name", response));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+    private void showpDialog() {
+        if (!pDialog.isShowing())
+            pDialog.show();
     }
 
-    // The following functions are for making web requests
+    private void hidepDialog() {
+        if (pDialog.isShowing())
+            pDialog.dismiss();
+    }
 
 
-    public void makeRequest(String url, RequestQueue queue, CustomJSONObjectRequest jsonRequest)
+    public void displayToast(String str)
     {
-
-        queue = CustomVolleyRequestQueue.getInstance(this.getApplicationContext())
-                .getRequestQueue();
-        //url = "http://api.androidhive.info/volley/person_object.json";
-        //String url = "http://jsonplaceholder.typicode.com/posts";
-        jsonRequest = new CustomJSONObjectRequest(Request.Method
-                .GET, url,
-                new JSONObject(), this, this);
-        jsonRequest.setTag(REQUEST_TAG);
-        queue.add(jsonRequest);
-    }
-
-    public String parseJSON(String tag, Object response) throws JSONException {
-        return ((JSONObject) response).getString("name");
+        Toast.makeText(ListPOIActivity.this, str, Toast.LENGTH_LONG).show();
     }
 
 }

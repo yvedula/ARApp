@@ -28,6 +28,7 @@
         android:required="true" />
 
     <application
+        android:name="com.teamar.cmu.arapp.AppController"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -48,6 +49,8 @@
         </activity>
         <activity android:name=".ListPOIActivity" >
         </activity>
+    <activity android:name=".POIDescription"></activity>
+
     </application>
 
 </manifest>
