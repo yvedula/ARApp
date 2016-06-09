@@ -30,7 +30,7 @@
 
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="For the last 70 years, students have been using the The Fence as the unofficial campus billboard painting it with witty or poignant messages or advertise upcoming events or recent accomplishments. Because of its highly visible location on campus, it is an ideal place to proclaim one's message to the student body. "
+
         />
 
     <TextView
@@ -68,7 +68,7 @@
         android:text="Start navigation"
         android:background="@color/colorPrimary"
         android:textColor="@android:color/white"
-        />
+        android:id="@+id/button_start_navigation" />
 
 
 

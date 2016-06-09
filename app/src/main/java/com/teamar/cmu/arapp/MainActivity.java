@@ -122,10 +122,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private static int FATEST_INTERVAL = 5000; // 5 sec
     private static int DISPLACEMENT = 10; // 10 meters
 
+    int poi_id;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Intent intent = getIntent();
+        poi_id = intent.getIntExtra("poi_id", 0);
 
         //displayLocation();
         poiLocation = new Location("POI");
@@ -229,7 +233,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 displayLocation();
                 try {
                     architectView.setLocation(mLastLocation.getLatitude(), mLastLocation.getLongitude(), 1f);
-                    architectView.load("file:///android_asset/radar/index.html?lat=" + poiLocation.getLatitude() + "&lon=" + poiLocation.getLongitude());
+                    architectView.load("file:///android_asset/radar/index.html?poi=" + poi_id);
                     //Toast.makeText(MainActivity.this, "Asset Loaded", Toast.LENGTH_SHORT).show();
                 } catch (Exception e) {
                     e.printStackTrace();

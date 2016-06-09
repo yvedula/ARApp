@@ -37,9 +37,9 @@ public class ListPOIActivity extends ListActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_poi);
 
-        POI fence = new POI("Fence");
-        POI gates = new POI("Gates");
-        POI nsh = new POI("NSH");
+//        POI fence = new POI("Fence");
+//        POI gates = new POI("Gates");
+//        POI nsh = new POI("NSH");
 
         pDialog = new ProgressDialog(this);
         pDialog.setMessage("Please wait...");
@@ -54,9 +54,19 @@ public class ListPOIActivity extends ListActivity {
     }
 
     protected void onListItemClick(ListView l, View v, int position, long id) {
-        String item = (String) getListAdapter().getItem(position);
+
+        //displayToast(""+position);
+        POI selectedPOI = poiList.get(position);
+        displayToast(selectedPOI.getPoiName());
+        //String poi_id = (String) getListAdapter().getItem(position);
+        String poi_name = selectedPOI.getPoiName();
+        String poi_description = selectedPOI.getDescription();
+        int poi_id = selectedPOI.getPoiID();
+        displayToast(""+poi_id);
         Intent intent = new Intent(this, POIDescription.class);
-        intent.putExtra("poi_name", item);
+        intent.putExtra("poi_id", poi_id);
+        intent.putExtra("poi_name", poi_name);
+        intent.putExtra("poi_description", poi_description);
         startActivity(intent);
     }
 
@@ -108,16 +118,23 @@ public class ListPOIActivity extends ListActivity {
 
                                 String description = person.getString("description");
                                 String id = person.getString("id");
+                                POI newPOI;
+                                try {
+                                    newPOI = new POI(Integer.parseInt(id));
+                                    poiNames[i] = name;
+                                    newPOI.setPoiName(name);
+                                    newPOI.setDescription(description);
+                                    poiList.add(newPOI);
+                                    ArrayAdapter<String> adapter = new ArrayAdapter<String>
+                                            (ListPOIActivity.this, android.R.layout.simple_list_item_1, poiNames);
+                                    setListAdapter(adapter);
+                                }
+                                catch (NumberFormatException e)
+                                {
+                                    displayToast("Invalid POI data encountered");
+                                }
+                                //poiList.add(new POI(name));
 
-                                poiList.add(new POI(name));
-                                poiNames[i] = name;
-                                jsonResponse += "Name: " + name + "\n\n";
-                                jsonResponse += "Description: " + description + "\n\n";
-                                jsonResponse += "ID: " + id + "\n\n\n";
-
-                                ArrayAdapter<String> adapter = new ArrayAdapter<String>
-                                        (ListPOIActivity.this, android.R.layout.simple_list_item_1, poiNames);
-                                setListAdapter(adapter);
 
                             }
 
@@ -159,7 +176,7 @@ public class ListPOIActivity extends ListActivity {
 
     public void displayToast(String str)
     {
-        Toast.makeText(ListPOIActivity.this, str, Toast.LENGTH_LONG).show();
+        Toast.makeText(ListPOIActivity.this, str, Toast.LENGTH_SHORT).show();
     }
 
 }
