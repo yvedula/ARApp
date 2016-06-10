@@ -21,52 +21,82 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
+/**
+ * Activity to display a list of all POIs in a ListView.
+ * This is the activity that the user first sees when
+ * the app is launched.
+ */
 public class ListPOIActivity extends ListActivity {
 
-   // private RequestQueue mQueue;
 
-
-    // Progress dialog
+    /**
+     * Progress dialog to show that information is being fetched.
+     */
     private ProgressDialog pDialog;
 
-    ArrayList<POI> poiList = new ArrayList<POI>();
+    /**
+     * List of all POIs on the server.
+     */
+    private ArrayList<POI> poiList = new ArrayList<POI>();
 
+    /**
+     * Tag for displaying logcat messages.
+     */
     public static final String REQUEST_TAG = "ListPOIActivity";
+
+    /**
+     * The URL for the web service with the list of all POIs.
+     */
+    public static final String POIS_URL = "https://example.wikitude.com/GetSamplePois/";
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_poi);
 
-//        POI fence = new POI("Fence");
-//        POI gates = new POI("Gates");
-//        POI nsh = new POI("NSH");
-
+        /**
+         * Setting up the progress dialog.
+         */
         pDialog = new ProgressDialog(this);
         pDialog.setMessage("Please wait...");
         pDialog.setCancelable(false);
 
-
-
-
-
-
-       // makeRequest("http://jsonplaceholder.typicode.com/posts", mQueue, jsonRequest);
     }
 
-    protected void onListItemClick(ListView l, View v, int position, long id) {
+    /**
+     * Function called when an item from the list is clicked on.
+     * @param l : The list view being displayed
+     * @param v : The view containing the list view
+     * @param position : The index of the item being clicked
+     * @param id : A unique ID
+     */
+    protected void onListItemClick(final ListView l, final View v, final int position, final long id) {
 
-        //displayToast(""+position);
+        /**
+         * Stores the information of the POI selected from the list view.
+         */
         POI selectedPOI = poiList.get(position);
-        displayToast(selectedPOI.getPoiName());
-        //String poi_id = (String) getListAdapter().getItem(position);
-        String poi_name = selectedPOI.getPoiName();
-        String poi_description = selectedPOI.getDescription();
-        int poi_id = selectedPOI.getPoiID();
-        displayToast(""+poi_id);
+
+        /**
+         * Name of the selected POI.
+         */
+        String poiName = selectedPOI.getPoiName();
+        /**
+         * Description of the selected POI.
+         */
+        String poiDescription = selectedPOI.getDescription();
+        /**
+         * Stores the unique ID of the POI selected.
+         */
+        int poiID = selectedPOI.getPoiID();
+
+        /**
+         * Creating an intent to start a new activity with details on the POI.
+         */
         Intent intent = new Intent(this, POIDescription.class);
-        intent.putExtra("poi_id", poi_id);
-        intent.putExtra("poi_name", poi_name);
-        intent.putExtra("poi_description", poi_description);
+        intent.putExtra("poi_id", poiID);
+        intent.putExtra("poi_name", poiName);
+        intent.putExtra("poi_description", poiDescription);
         startActivity(intent);
     }
 
@@ -76,10 +106,8 @@ public class ListPOIActivity extends ListActivity {
     protected void onStart() {
         super.onStart();
 
-        String url = "https://example.wikitude.com/GetSamplePois/";
-        makeJsonArrayRequest(url);
+        makeJsonArrayRequest(POIS_URL);
 
-               // mQueue.add(jsonRequest);
 
     }
 
@@ -90,23 +118,25 @@ public class ListPOIActivity extends ListActivity {
     }
 
 
-
     /**
-     * Method to make json array request where response starts with [
-     * */
-    private void makeJsonArrayRequest(String urlJsonArry) {
+     * Method to make JSON array request where response starts with '[' .
+     * @param urlJsonArry : The string containing the JSON array returned by the web request
+     */
+    private void makeJsonArrayRequest(final String urlJsonArry) {
 
         showpDialog();
 
         JsonArrayRequest req = new JsonArrayRequest(urlJsonArry,
                 new Response.Listener<JSONArray>() {
                     @Override
-                    public void onResponse(JSONArray response) {
+                    public void onResponse(final JSONArray response) {
                         Log.d("TAG", response.toString());
 
                         try {
-                            // Parsing json array response
-                            // loop through each json object
+                            /**
+                             * Parsing json array response
+                             * loop through each json object
+                             **/
                             String jsonResponse = "";
                             String[] poiNames = new String[response.length()];
                             for (int i = 0; i < response.length(); i++) {
@@ -125,21 +155,12 @@ public class ListPOIActivity extends ListActivity {
                                     newPOI.setPoiName(name);
                                     newPOI.setDescription(description);
                                     poiList.add(newPOI);
-                                    ArrayAdapter<String> adapter = new ArrayAdapter<String>
-                                            (ListPOIActivity.this, android.R.layout.simple_list_item_1, poiNames);
+                                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(ListPOIActivity.this, android.R.layout.simple_list_item_1, poiNames);
                                     setListAdapter(adapter);
-                                }
-                                catch (NumberFormatException e)
-                                {
+                                } catch (NumberFormatException e) {
                                     displayToast("Invalid POI data encountered");
                                 }
-                                //poiList.add(new POI(name));
-
-
                             }
-
-                            //displayToast(jsonResponse);
-
                         } catch (JSONException e) {
                             e.printStackTrace();
                             Toast.makeText(getApplicationContext(),
@@ -151,7 +172,7 @@ public class ListPOIActivity extends ListActivity {
                     }
                 }, new Response.ErrorListener() {
             @Override
-            public void onErrorResponse(VolleyError error) {
+            public void onErrorResponse(final VolleyError error) {
                 VolleyLog.d("TAG", "Error: " + error.getMessage());
                 Toast.makeText(getApplicationContext(),
                         error.getMessage(), Toast.LENGTH_SHORT).show();
@@ -163,20 +184,29 @@ public class ListPOIActivity extends ListActivity {
         AppController.getInstance().addToRequestQueue(req);
     }
 
+    /**
+     * Function to show the progress dialog.
+     */
     private void showpDialog() {
-        if (!pDialog.isShowing())
+        if (!pDialog.isShowing()) {
             pDialog.show();
+        }
     }
 
+    /**
+     * Function to hide the progress dialog.
+     */
     private void hidepDialog() {
-        if (pDialog.isShowing())
+        if (pDialog.isShowing()) {
             pDialog.dismiss();
+        }
     }
 
-
-    public void displayToast(String str)
-    {
+    /**
+     * Function to display a toast.
+     * @param str : String to be displayed.
+     */
+    public void displayToast(final String str) {
         Toast.makeText(ListPOIActivity.this, str, Toast.LENGTH_SHORT).show();
     }
-
 }

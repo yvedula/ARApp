@@ -39,7 +39,7 @@
             android:value="@integer/google_play_services_version" />
 
         <activity
-            android:name=".MainActivity"
+            android:name=".ListPOIActivity"
             android:configChanges="screenSize|orientation" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -47,7 +47,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ListPOIActivity" >
+        <activity android:name=".MainActivity" >
         </activity>
     <activity android:name=".POIDescription"></activity>
 
