@@ -52,7 +52,7 @@ var World = {
 		*/
 
 		/* Create overlay for page one */
-        var imgOne = new AR.ImageResource("assets/imageOne.png");
+        var imgOne = new AR.ImageResource("file:///storage/emulated/0/ar_images/ar_image.jpg");
 		//var imgOne = new AR.ImageResource("assets/maxresdefault.jpg");
 
 		//var imgOne = new AR.ImageResource(serverURL+imgSource);
@@ -85,6 +85,7 @@ var World = {
 		document.getElementById('loadingMessage').innerHTML =
 			"<div" + cssDivLeft + ">Scan Target &#35;1 (surfer):</div>" +
 			"<div" + cssDivRight + "><img src='assets/surfer.png'></img></div>";
+
 
 		// Remove Scan target message after 10 sec.
 		setTimeout(function() {

@@ -14,6 +14,7 @@ import android.location.LocationListener;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -30,8 +31,11 @@ import com.google.android.gms.location.LocationServices;
 import com.wikitude.architect.ArchitectView;
 import com.wikitude.architect.StartupConfiguration;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Random;
 
 /**
  * MainActivity : The activity responsible for launching a particular AR task.
@@ -77,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     /**
      * Variable to store the URL of the image to be retrieved.
      */
-    String imageToRender = "http://www.clipartbest.com/cliparts/4c9/aLK/4c9aLKBKi.jpeg";
+    String imageToRender = "https://upload.wikimedia.org/wikipedia/en/thumb/e/ea/Superman_shield.svg/1280px-Superman_shield.svg.png";//"http://www.clipartbest.com/cliparts/4c9/aLK/4c9aLKBKi.jpeg";
     String imageToRender1 = "4c9aLKBKi.jpeg";
 
     /**
@@ -155,6 +159,24 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             // result of the request.
 
         }
+
+        if (ContextCompat.checkSelfPermission(MainActivity.this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+
+            // No explanation needed, we can request the permission.
+
+            ActivityCompat.requestPermissions(MainActivity.this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    3);
+
+            // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+            // app-defined int constant. The callback method gets the
+            // result of the request.
+
+        }
+
 
         // Here, thisActivity is the current activity
         if (ContextCompat.checkSelfPermission(MainActivity.this,
@@ -286,7 +308,25 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 }
                 return;
             }
+            case 3: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
+
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                    this.architectView = (ArchitectView) this.findViewById(R.id.architectView);
+                    final StartupConfiguration config = new StartupConfiguration("N78dKe/7vwHCJYIW2k0heOaNYyIE5EX2NiBrtYJhFMAaEBLdX0RrD7WoYMfKLlr0czbU5IL6Jl54+VmCFcp4/aKVIozWqGe2FvoFLHhEhkxopx3qZeDkLQ+fKoLBZQ79A+3UXn9FBxSg8aE3hRdcyww80nTy3pKV1lzDT02GKfdTYWx0ZWRfX02mWSHVrgDw49S/vdK7jaaJqdRKfADZwA81pc62IoswUzkEuPe8l6Nle8EsCOs9eU1j+hFSz0FT5gY/zunGpEihbdLtR6bTGnp+Qy18PbeIQZrP2NHAVPl/ksaBVx1BWMt6xmorTmrFICITgDYFFyUPCIBLpo7ZrdErZA25Oi3nmtskFnxNlyGLij4lOCEV6phC7xDbItlSmtNG3pYxurRqfbC18Z2/deIYR07aRRHYloD1JKPn4BT5dbJxwsUhsFJvtkrVPFXYqM0+MJveDgZD3LuovqhX/EFIWzhK3E9w55sbP+p+UgFUDaaH8D7VLtyN4D1P2QO5WnaKPIzchn1njnECeF6JuN0mRAQ1Y0HfpLaCInLAA4RH/6zHvx0jzC/AtKZMBHgtbrznLEmqS757FYvkf+jEuDPY1ISUzyPQ4JHQM8eaD1eGGT+UfgV9AkhKddTHIeXuv9iL0L7aE8OTXZD19H6BhNq/1JG1mMvdyo10z85fLO4=");
+                    this.architectView.onCreate(config);
+
+                } else {
+                    Log.d("ARApp", "External Storage permissions denied");
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
             // other 'case' lines to check for other
             // permissions this app might request
         }
@@ -366,12 +406,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
-            //    public void requestPermissions(@NonNull String[] permissions, int requestCode)
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for Activity#requestPermissions for more details.
+
             return;
         }
         mLastLocation = LocationServices.FusedLocationApi
@@ -467,7 +502,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             // Create a progressdialog
             mProgressDialog = new ProgressDialog(MainActivity.this);
             // Set progressdialog title
-            mProgressDialog.setTitle("Download Image Tutorial");
+            mProgressDialog.setTitle("Please wait while the image loads");
             // Set progressdialog message
             mProgressDialog.setMessage("Loading...");
             mProgressDialog.setIndeterminate(false);
@@ -496,9 +531,34 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         protected void onPostExecute(Bitmap result) {
             // Set the bitmap into ImageView
             //image.setImageBitmap(result);
+            saveImageToFile("ar_image", result);
             displayToast("Image Downloaded!");
             // Close progressdialog
             mProgressDialog.dismiss();
+        }
+    }
+
+    private void saveImageToFile(String fileName, Bitmap finalBitmap) {
+
+        String root = Environment.getExternalStorageDirectory().toString();
+        File myDir = new File(root + "/ar_images");
+        myDir.mkdirs();
+        Random generator = new Random();
+//        int n = 10000;
+//        n = generator.nextInt(n);
+        String fname = fileName +".jpg";
+        File file = new File (myDir, fname);
+
+        Log.d("IMG", file.getAbsolutePath());
+        if (file.exists ()) file.delete ();
+        try {
+            FileOutputStream out = new FileOutputStream(file);
+            finalBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+            out.flush();
+            out.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
