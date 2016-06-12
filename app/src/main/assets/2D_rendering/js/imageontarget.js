@@ -1,5 +1,6 @@
 var beginsTime;
 var serverURL = "http://www.clipartbest.com/cliparts/4c9/aLK/"
+//var serverURL = "http://www.clipartbest.com/cliparts/4c9/aLK/"
 function $_GET(param) {
 	var vars = {};
 	window.location.href.replace( location.hash, '' ).replace(
@@ -43,10 +44,12 @@ var World = {
 			Important: If you replace the tracker file with your own, make sure to change the target name accordingly.
 			Use a specific target name to respond only to a certain target or use a wildcard to respond to any or a certain group of targets.
 		*/
-		this.tracker = new AR.ClientTracker("assets/magazine.wtc", {
+//		this.tracker = new AR.ClientTracker("assets/magazine.wtc", {
+//			onLoaded: this.worldLoaded
+//		});
+		this.tracker = new AR.ClientTracker("file:///storage/emulated/0/ar_images/tracker.wtc", {
 			onLoaded: this.worldLoaded
 		});
-
 		/*
 			The next step is to create the augmentation. In this example an image resource is created and passed to the AR.ImageDrawable. A drawable is a visual component that can be connected to an IR target (AR.Trackable2DObject) or a geolocated object (AR.GeoObject). The AR.ImageDrawable is initialized by the image and its size. Optional parameters allow for position it relative to the recognized target.
 		*/

@@ -73,9 +73,9 @@
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/dependency-cache" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/dex" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/dex-cache" />
-      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.0.0/jars" />
+      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.android.support/appcompat-v7/23.1.1/jars" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.android.support/mediarouter-v7/23.0.0/jars" />
-      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.android.support/support-v4/23.0.0/jars" />
+      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.android.support/support-v4/23.1.1/jars" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.google.android.gms/play-services-ads-lite/9.0.1/jars" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.google.android.gms/play-services-ads/9.0.1/jars" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/exploded-aar/com.google.android.gms/play-services-analytics-impl/9.0.1/jars" />
@@ -146,9 +146,10 @@
     <orderEntry type="library" exported="" name="play-services-wearable-9.0.1" level="project" />
     <orderEntry type="library" exported="" name="firebase-storage-9.0.1" level="project" />
     <orderEntry type="library" exported="" name="play-services-iid-9.0.1" level="project" />
-    <orderEntry type="library" exported="" name="support-v4-23.0.0" level="project" />
     <orderEntry type="library" exported="" name="play-services-drive-9.0.1" level="project" />
     <orderEntry type="library" exported="" name="firebase-auth-9.0.1" level="project" />
+    <orderEntry type="library" exported="" name="support-annotations-23.1.1" level="project" />
+    <orderEntry type="library" exported="" name="appcompat-v7-23.1.1" level="project" />
     <orderEntry type="library" exported="" name="play-services-wallet-9.0.1" level="project" />
     <orderEntry type="library" exported="" name="firebase-common-9.0.1" level="project" />
     <orderEntry type="library" exported="" name="play-services-cast-9.0.1" level="project" />
@@ -172,9 +173,8 @@
     <orderEntry type="library" exported="" name="play-services-plus-9.0.1" level="project" />
     <orderEntry type="library" exported="" name="play-services-appindexing-9.0.1" level="project" />
     <orderEntry type="library" exported="" name="firebase-storage-common-9.0.1" level="project" />
-    <orderEntry type="library" exported="" name="appcompat-v7-23.0.0" level="project" />
+    <orderEntry type="library" exported="" name="support-v4-23.1.1" level="project" />
     <orderEntry type="library" exported="" name="firebase-auth-common-9.0.1" level="project" />
-    <orderEntry type="library" exported="" name="support-annotations-23.0.0" level="project" />
     <orderEntry type="library" exported="" name="play-services-games-9.0.1" level="project" />
     <orderEntry type="library" exported="" name="play-services-identity-9.0.1" level="project" />
     <orderEntry type="library" exported="" name="play-services-auth-base-9.0.1" level="project" />

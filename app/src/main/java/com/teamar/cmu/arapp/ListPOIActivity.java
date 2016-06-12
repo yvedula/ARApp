@@ -35,6 +35,10 @@ public class ListPOIActivity extends ListActivity {
     private ProgressDialog pDialog;
 
     /**
+     * Variable to store the number of POIs returned.
+     */
+    int numElements;
+    /**
      * List of all POIs on the server.
      */
     private ArrayList<POI> poiList = new ArrayList<POI>();
@@ -95,8 +99,6 @@ public class ListPOIActivity extends ListActivity {
          */
         Intent intent = new Intent(this, POIDescription.class);
         intent.putExtra("poi_id", poiID);
-        intent.putExtra("poi_name", poiName);
-        intent.putExtra("poi_description", poiDescription);
         startActivity(intent);
     }
 
@@ -122,9 +124,10 @@ public class ListPOIActivity extends ListActivity {
      * Method to make JSON array request where response starts with '[' .
      * @param urlJsonArry : The string containing the JSON array returned by the web request
      */
-    private void makeJsonArrayRequest(final String urlJsonArry) {
+    public int makeJsonArrayRequest(final String urlJsonArry) {
 
         showpDialog();
+
 
         JsonArrayRequest req = new JsonArrayRequest(urlJsonArry,
                 new Response.Listener<JSONArray>() {
@@ -139,6 +142,7 @@ public class ListPOIActivity extends ListActivity {
                              **/
                             String jsonResponse = "";
                             String[] poiNames = new String[response.length()];
+                            numElements = response.length();
                             for (int i = 0; i < response.length(); i++) {
 
                                 JSONObject person = (JSONObject) response
@@ -182,6 +186,8 @@ public class ListPOIActivity extends ListActivity {
 
         // Adding request to request queue
         AppController.getInstance().addToRequestQueue(req);
+        return numElements;
+
     }
 
     /**
