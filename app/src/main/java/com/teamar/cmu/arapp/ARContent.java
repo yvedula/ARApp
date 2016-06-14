@@ -8,11 +8,11 @@ public class ARContent {
 
     private String name;
     private String description;
-    private String artistName;
+    private String artistID;
     private int id;
 
-    public ARContent(String name) {
-        this.name = name;
+    public ARContent(int id) {
+        this.id = id;
     }
 
     public String getARName() {
@@ -31,12 +31,12 @@ public class ARContent {
         this.description = description;
     }
 
-    public String getArtistName() {
-        return artistName;
+    public String getArtistID() {
+        return artistID;
     }
 
-    public void setArtistName(String artistName) {
-        this.artistName = artistName;
+    public void setArtistID(String artistID) {
+        this.artistID = artistID;
     }
 
 

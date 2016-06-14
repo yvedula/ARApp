@@ -44,7 +44,7 @@ var World = {
 			Important: If you replace the tracker file with your own, make sure to change the target name accordingly.
 			Use a specific target name to respond only to a certain target or use a wildcard to respond to any or a certain group of targets.
 		*/
-//		this.tracker = new AR.ClientTracker("assets/magazine.wtc", {
+//		this.tracker = new AR.ClientTracker("assets/surfer.wtc", {
 //			onLoaded: this.worldLoaded
 //		});
 		this.tracker = new AR.ClientTracker("file:///storage/emulated/0/ar_images/tracker.wtc", {
@@ -56,11 +56,6 @@ var World = {
 
 		/* Create overlay for page one */
         var imgOne = new AR.ImageResource("file:///storage/emulated/0/ar_images/ar_image.jpg");
-		//var imgOne = new AR.ImageResource("assets/maxresdefault.jpg");
-
-		//var imgOne = new AR.ImageResource(serverURL+imgSource);
-		//var imgOne = new AR.ImageResource("assets/retina.jpg");
-		//var imgOne = new AR.ImageResource("http://www.planwallpaper.com/static/images/blue_ocean-dsc00251-1080p.jpg");
 
 		var overlayOne = new AR.ImageDrawable(imgOne, 3, {
 			offsetX: -0.15,

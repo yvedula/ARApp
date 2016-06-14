@@ -1,5 +1,6 @@
 package com.teamar.cmu.arapp;
 
+import android.app.Dialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -84,7 +85,7 @@ public class POIDescription extends ListActivity {
      */
     public static final String POIS_URL = "http://ec2-54-209-186-152.compute-1.amazonaws.com:7001/v1/pois/";
 
-    String markerFile = "https://s3.amazonaws.com/testarbucket/resources/markers/surfer.wtc";
+    String markerFile = "https://s3.amazonaws.com/testarbucket/resources/markers/magazine.wtc";
     public static final String TAG = "POIDescription";
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -110,10 +111,10 @@ public class POIDescription extends ListActivity {
             @Override
             public void onClick(final View v) {
                 Intent intent = new Intent(POIDescription.this, MainActivity.class);
-                intent.putExtra("poiID", poiID);
+                intent.putExtra("poi_id", poiID);
                 displayToast("ID: " + poiID);
-                intent.putExtra("poiName", poiName);
-                intent.putExtra("poiDescription", poiDescription);
+                intent.putExtra("poi_name", poiName);
+                intent.putExtra("poi_description", poiDescription);
                 startActivity(intent);
             }
         });
@@ -122,16 +123,43 @@ public class POIDescription extends ListActivity {
 
     @Override
     protected void onListItemClick(final ListView l, final View v, final int position, final long id) {
+
+        final Dialog dialog = new Dialog(POIDescription.this);
+        dialog.setContentView(R.layout.dialog_ar_details);
+        dialog.setTitle("Title...");
+
+        TextView text1 = (TextView) dialog.findViewById(R.id.textview_artwork);
+        TextView text2 = (TextView) dialog.findViewById(R.id.textview_description);
+        TextView text3 = (TextView) dialog.findViewById(R.id.textview_artist);
+        Button ok = (Button) dialog.findViewById(R.id.buttonOK);
+
+        ok.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                dialog.dismiss();
+            }
+        });
         String item = (String) getListAdapter().getItem(position);
-        Toast.makeText(this, item + " selected", Toast.LENGTH_LONG).show();
+
+        text1.setText(arList.get(position).getARName());
+        text2.setText(arList.get(position).getDescription());
+        //text3.setText(arList.get(position).getArtistID());
+        text3.setText("John Mayers");
+        dialog.show();
+        //Toast.makeText(this, arList.get(position).getArtistID() + " selected", Toast.LENGTH_LONG).show();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
 
+
+
         makeJsonObjectRequest(POIS_URL + poiID);
-        makeJsonArrayRequest(POIS_URL + poiID+"/ar");
+
+        displayToast(POIS_URL   + poiID+"/ar");
+        makeJsonArrayRequest(POIS_URL   + poiID+"/ar");
         new DownloadFileFromURL().execute(markerFile);
 
     }
@@ -170,17 +198,17 @@ public class POIDescription extends ListActivity {
                                 JSONObject ar = (JSONObject) response
                                         .get(i);
 
-                                String name = ar.getString("name");
+                                String name = ar.getString("arName");
                                 String description = ar.getString("description");
-                                String artistName = ar.getString("artist_name");
-                                //String id = ar.getString("id");
+                                String artistID = ar.getString("userID");
+                                int id = Integer.parseInt(ar.getString("arID"));
                                 ARContent newAR;
                                 try {
-                                    newAR = new ARContent(name);
+                                    newAR = new ARContent(id);
                                     arNames[i] = name;
                                     newAR.setARName(name);
                                     newAR.setDescription(description);
-                                    newAR.setDescription(artistName);
+                                    newAR.setArtistID(artistID);
                                     arList.add(newAR);
                                     ArrayAdapter<String> adapter = new ArrayAdapter<String>(POIDescription.this, android.R.layout.simple_list_item_1, arNames);
                                     setListAdapter(adapter);
@@ -265,9 +293,8 @@ public class POIDescription extends ListActivity {
 
         // Adding request to request queue
         AppController.getInstance().addToRequestQueue(jsonObjReq);
-
-
     }
+
 
     public void populateUI(String poiName, String poiDescription, String poiLocation)
     {

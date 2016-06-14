@@ -68,15 +68,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
      * Button to view AR content.
      */
     private Button bViewAR;
-    /**
-     * Variable to store the latitude of the POI.
-     */
-    protected double latitude = 40.444410;
 
-    /**
-     * Variable to store the longitude of the POI.
-     */
-    protected double longitude = -79.942805;
 
     /**
      * Variable to store the URL of the image to be retrieved.
@@ -109,7 +101,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
      * Boolean flag to toggle periodic location updates
      */
 
-    private boolean mRequestingLocationUpdates = false;
+    private boolean mRequestingLocationUpdates = true;
 
     /**
      * LocationRequest object.
@@ -137,8 +129,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         //displayLocation();
         poiLocation = new Location("POI");
-        poiLocation.setLatitude(latitude);
-        poiLocation.setLongitude(longitude);
+        //poiLocation.setLatitude(latitude);
+        //poiLocation.setLongitude(longitude);
         bLoc = (Button) findViewById(R.id.buttonLocation);
         bPOIs = (Button) findViewById(R.id.buttonPOIs);
         bViewAR = (Button) findViewById(R.id.bViewAR);
@@ -231,15 +223,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             buildGoogleApiClient();
         }
 
+
+        locatePOI();
         bViewAR.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    new DownloadImage().execute(imageToRender);
-                    architectView.load("file:///android_asset/2D_rendering/index.html?url='"+imageToRender1+"'");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                viewAR();
             }
         });
         bPOIs.setOnClickListener(new View.OnClickListener() {
@@ -252,19 +241,32 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         bLoc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                displayLocation();
-                try {
-                    architectView.setLocation(mLastLocation.getLatitude(), mLastLocation.getLongitude(), 1f);
-                    architectView.load("file:///android_asset/radar/index.html?poi=" + poi_id);
-                    //Toast.makeText(MainActivity.this, "Asset Loaded", Toast.LENGTH_SHORT).show();
-                } catch (Exception e) {
-                    e.printStackTrace();
-
-                }
+                locatePOI();
             }
         });
+
     }
 
+
+    public void locatePOI(){
+        try {
+            architectView.setLocation(mLastLocation.getLatitude(), mLastLocation.getLongitude(), 1f);
+            architectView.load("file:///android_asset/radar/index.html?poi=" + poi_id);
+            //Toast.makeText(MainActivity.this, "Asset Loaded", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+    }
+
+    public void viewAR(){
+        try {
+            new DownloadImage().execute(imageToRender);
+            architectView.load("file:///android_asset/2D_rendering/index.html?url='"+imageToRender1+"'");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults) {
@@ -464,17 +466,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public void onLocationChanged(Location location)
     {
         mLastLocation = location;
-        try {
-            if (mLastLocation.distanceTo(poiLocation) < 15)
-                architectView.load("file:///android_asset/2D_rendering/index.html?url='" + imageToRender + "'");
-            else
-                architectView.load("file:///android_asset/selecting/index.html?lat=" + poiLocation.getLatitude() + "&lon=" + poiLocation.getLongitude());
-            //Toast.makeText(MainActivity.this, "Asset Loaded", Toast.LENGTH_SHORT).show();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
+
     }
 
     @Override

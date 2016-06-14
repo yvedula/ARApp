@@ -65,7 +65,7 @@
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Start navigation"
+        android:text="AR Feed"
         android:background="@color/colorPrimary"
         android:textColor="@android:color/white"
         android:id="@+id/button_start_navigation" />
