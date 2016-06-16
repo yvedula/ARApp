@@ -3,7 +3,9 @@ package com.teamar.cmu.arapp;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -19,10 +21,19 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -31,10 +42,13 @@ import com.google.android.gms.location.LocationServices;
 import com.wikitude.architect.ArchitectView;
 import com.wikitude.architect.StartupConfiguration;
 
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Random;
 
 /**
@@ -73,8 +87,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     /**
      * Variable to store the URL of the image to be retrieved.
      */
-    String imageToRender = "https://upload.wikimedia.org/wikipedia/en/thumb/e/ea/Superman_shield.svg/1280px-Superman_shield.svg.png";//"http://www.clipartbest.com/cliparts/4c9/aLK/4c9aLKBKi.jpeg";
-    String imageToRender1 = "4c9aLKBKi.jpeg";
+    String imageToRender;// = "https://upload.wikimedia.org/wikipedia/en/thumb/e/ea/Superman_shield.svg/1280px-Superman_shield.svg.png";//"http://www.clipartbest.com/cliparts/4c9/aLK/4c9aLKBKi.jpeg";
+    //String imageToRender1 = "4c9aLKBKi.jpeg";
 
     /**
      * Logcat tag.
@@ -124,7 +138,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Intent intent = getIntent();
+        final Intent intent = getIntent();
         poi_id = intent.getIntExtra("poi_id", 0);
 
         //displayLocation();
@@ -134,61 +148,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         bLoc = (Button) findViewById(R.id.buttonLocation);
         bPOIs = (Button) findViewById(R.id.buttonPOIs);
         bViewAR = (Button) findViewById(R.id.bViewAR);
-        // Here, thisActivity is the current activity
-        if (ContextCompat.checkSelfPermission(MainActivity.this,
-                Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
 
+        checkLocationPermissions();
 
-            // No explanation needed, we can request the permission.
-
-            ActivityCompat.requestPermissions(MainActivity.this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    2);
-
-            // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-            // app-defined int constant. The callback method gets the
-            // result of the request.
-
-        }
-
-        if (ContextCompat.checkSelfPermission(MainActivity.this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-
-
-            // No explanation needed, we can request the permission.
-
-            ActivityCompat.requestPermissions(MainActivity.this,
-                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    3);
-
-            // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-            // app-defined int constant. The callback method gets the
-            // result of the request.
-
-        }
-
-
-        // Here, thisActivity is the current activity
-        if (ContextCompat.checkSelfPermission(MainActivity.this,
-                Manifest.permission.CAMERA)
-                != PackageManager.PERMISSION_GRANTED) {
-
-
-            ActivityCompat.requestPermissions(MainActivity.this,
-                    new String[]{Manifest.permission.CAMERA},
-                    1);
-
-            // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-            // app-defined int constant. The callback method gets the
-            // result of the request.
-
-        }
         if (ContextCompat.checkSelfPermission(MainActivity.this,
                 Manifest.permission.CAMERA)
                 == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(MainActivity.this,
                 Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED  && ContextCompat.checkSelfPermission(MainActivity.this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 == PackageManager.PERMISSION_GRANTED) {
             try {
                 this.architectView = (ArchitectView) this.findViewById(R.id.architectView);
@@ -211,9 +179,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
 
 
-//        this.architectView = (ArchitectView) this.findViewById(R.id.architectView);
-//        final StartupConfiguration config = new StartupConfiguration("N78dKe/7vwHCJYIW2k0heOaNYyIE5EX2NiBrtYJhFMAaEBLdX0RrD7WoYMfKLlr0czbU5IL6Jl54+VmCFcp4/aKVIozWqGe2FvoFLHhEhkxopx3qZeDkLQ+fKoLBZQ79A+3UXn9FBxSg8aE3hRdcyww80nTy3pKV1lzDT02GKfdTYWx0ZWRfX02mWSHVrgDw49S/vdK7jaaJqdRKfADZwA81pc62IoswUzkEuPe8l6Nle8EsCOs9eU1j+hFSz0FT5gY/zunGpEihbdLtR6bTGnp+Qy18PbeIQZrP2NHAVPl/ksaBVx1BWMt6xmorTmrFICITgDYFFyUPCIBLpo7ZrdErZA25Oi3nmtskFnxNlyGLij4lOCEV6phC7xDbItlSmtNG3pYxurRqfbC18Z2/deIYR07aRRHYloD1JKPn4BT5dbJxwsUhsFJvtkrVPFXYqM0+MJveDgZD3LuovqhX/EFIWzhK3E9w55sbP+p+UgFUDaaH8D7VLtyN4D1P2QO5WnaKPIzchn1njnECeF6JuN0mRAQ1Y0HfpLaCInLAA4RH/6zHvx0jzC/AtKZMBHgtbrznLEmqS757FYvkf+jEuDPY1ISUzyPQ4JHQM8eaD1eGGT+UfgV9AkhKddTHIeXuv9iL0L7aE8OTXZD19H6BhNq/1JG1mMvdyo10z85fLO4=");
-//        this.architectView.onCreate(config);
 
 
         // First we need to check availability of play services
@@ -223,12 +188,50 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             buildGoogleApiClient();
         }
 
+        final Dialog dialog = new Dialog(MainActivity.this);
+        //dialog.setContentView(R.layout.dialog_choose_ar);
+        dialog.setTitle("Title...");
 
-        locatePOI();
+        LayoutInflater li = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View v = li.inflate(R.layout.dialog_choose_ar, null, false);
+
+        dialog.setContentView(v);
+        dialog.setCancelable(true);
+
+        ListView list1 = (ListView) dialog.findViewById(R.id.listview_ar);
+        list1.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+
+                int selected_ar = intent.getIntegerArrayListExtra("ar_ids").get(position);
+                String url_1 = "http://ec2-54-209-186-152.compute-1.amazonaws.com:7001/v1/pois/" + poi_id + "/ar/" + selected_ar;
+                Log.d("URL_1", url_1);
+                getImageURL(url_1);
+
+                Log.d("IMG", url_1);
+//                displayToast(url);
+                dialog.dismiss();
+
+                viewAR(intent.getIntegerArrayListExtra("ar_ids").get(position));
+            }
+        });
+
+        ArrayList<String> arNames_al = new ArrayList<String>();
+
+        arNames_al = intent.getStringArrayListExtra("ar_names");
+        String[] val = new String[arNames_al.size()];
+        for(int i = 0; i < arNames_al.size(); i++) {
+            val[i] = arNames_al.get(i);
+        }
+        list1.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, val));
+        //now that the dialog is set up, it's time to show it
+
+
         bViewAR.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                viewAR();
+                dialog.show();
             }
         });
         bPOIs.setOnClickListener(new View.OnClickListener() {
@@ -245,8 +248,25 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             }
         });
 
+
+
     }
 
+    public void checkLocationPermissions() {
+        // Here, thisActivity is the current activity
+        if (ContextCompat.checkSelfPermission(MainActivity.this,
+                android.Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+
+            // No explanation needed, we can request the permission.
+
+            ActivityCompat.requestPermissions(MainActivity.this,
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                    2);
+
+        }
+    }
 
     public void locatePOI(){
         try {
@@ -259,14 +279,18 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
     }
 
-    public void viewAR(){
+    public void viewAR(int id){
         try {
-            new DownloadImage().execute(imageToRender);
-            architectView.load("file:///android_asset/2D_rendering/index.html?url='"+imageToRender1+"'");
+
+            //new DownloadImage().execute(imageToRender);
+
+            architectView.load("file:///android_asset/2D_rendering/index.html?id="+id);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults) {
@@ -398,7 +422,60 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
     }
 
+    /**
+     * Method to make json object request where json response starts wtih {
+     * */
+    private void getImageURL(String urlJsonObj) {
 
+        //showpDialog();
+
+
+
+        JsonObjectRequest jsonObjReq = new JsonObjectRequest(Request.Method.GET,
+                urlJsonObj, null, new Response.Listener<JSONObject>() {
+
+            @Override
+            public void onResponse(JSONObject response) {
+                Log.d(TAG, response.toString());
+
+                try {
+                    // Parsing json object response
+                    // response will be a json object
+//                    String name = response.getString("poiName");
+//                    String description = response.getString("description");
+//                    String address = response.getString("address");
+                    //imageToRender = response.getString("storageLocation");
+                    imageToRender = response.getString("storageLocation");
+                    Log.d("RET1", " " + imageToRender);
+                    new DownloadImage().execute(imageToRender);
+
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Toast.makeText(getApplicationContext(),
+                            "Error: " + e.getMessage(),
+                            Toast.LENGTH_LONG).show();
+                }
+               // hidepDialog();
+            }
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.d(TAG, "Error: " + error.getMessage());
+                Toast.makeText(getApplicationContext(),
+                        error.getMessage(), Toast.LENGTH_SHORT).show();
+                // hide the progress dialog
+               // hidepDialog();
+            }
+        });
+
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(jsonObjReq);
+
+        Log.d("RET2", " " + imageToRender);
+        //return imageToRender;
+    }
 
     /**
      * Method to display the location on UI

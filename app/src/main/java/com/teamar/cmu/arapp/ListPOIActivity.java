@@ -1,9 +1,13 @@
 package com.teamar.cmu.arapp;
 
+import android.Manifest;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -20,6 +24,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Activity to display a list of all POIs in a ListView.
@@ -28,6 +33,8 @@ import java.util.ArrayList;
  */
 public class ListPOIActivity extends ListActivity {
 
+
+    public static final int REQUEST_ID_MULTIPLE_PERMISSIONS = 1;
 
     /**
      * Progress dialog to show that information is being fetched.
@@ -51,12 +58,18 @@ public class ListPOIActivity extends ListActivity {
     /**
      * The URL for the web service with the list of all POIs.
      */
-    public static final String POIS_URL = "https://example.wikitude.com/GetSamplePois/";
-    //public static final String POIS_URL = "http://ec2-54-209-186-152.compute-1.amazonaws.com:7001/v1/pois";
+    //public static final String POIS_URL = "https://example.wikitude.com/GetSamplePois/";
+    public static final String POIS_URL = "http://ec2-54-209-186-152.compute-1.amazonaws.com:7001/v1/pois";
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_poi);
+
+//        checkCameraPermissions();
+//        checkLocationPermissions();
+//        checkStoragePermissions();
+
+        checkAndRequestPermissions();
 
         /**
          * Setting up the progress dialog.
@@ -64,6 +77,8 @@ public class ListPOIActivity extends ListActivity {
         pDialog = new ProgressDialog(this);
         pDialog.setMessage("Please wait...");
         pDialog.setCancelable(false);
+
+
 
     }
 
@@ -120,6 +135,76 @@ public class ListPOIActivity extends ListActivity {
     }
 
 
+    private  boolean checkAndRequestPermissions() {
+        int permissionUseCamera = ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA);
+        int locationPermission = ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION);
+        int storagePermission = ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        List<String> listPermissionsNeeded = new ArrayList<>();
+        if (locationPermission != PackageManager.PERMISSION_GRANTED) {
+            listPermissionsNeeded.add(android.Manifest.permission.ACCESS_FINE_LOCATION);
+        }
+        if (permissionUseCamera != PackageManager.PERMISSION_GRANTED) {
+            listPermissionsNeeded.add(android.Manifest.permission.CAMERA);
+        }
+        if (storagePermission != PackageManager.PERMISSION_GRANTED) {
+            listPermissionsNeeded.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        }
+        if (!listPermissionsNeeded.isEmpty()) {
+            ActivityCompat.requestPermissions(this, listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]),REQUEST_ID_MULTIPLE_PERMISSIONS);
+            return false;
+        }
+        return true;
+    }
+
+//    public void checkCameraPermissions() {
+//
+//        // Here, thisActivity is the current activity
+//        if (ContextCompat.checkSelfPermission(ListPOIActivity.this,
+//                android.Manifest.permission.CAMERA)
+//                != PackageManager.PERMISSION_GRANTED) {
+//
+//
+//            ActivityCompat.requestPermissions(ListPOIActivity.this,
+//                    new String[]{android.Manifest.permission.CAMERA},
+//                    1);
+//
+//
+//        }
+//    }
+//
+//    public void checkLocationPermissions() {
+//        // Here, thisActivity is the current activity
+//        if (ContextCompat.checkSelfPermission(ListPOIActivity.this,
+//                android.Manifest.permission.ACCESS_FINE_LOCATION)
+//                != PackageManager.PERMISSION_GRANTED) {
+//
+//
+//            // No explanation needed, we can request the permission.
+//
+//            ActivityCompat.requestPermissions(ListPOIActivity.this,
+//                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+//                    2);
+//
+//        }
+//    }
+//
+//    public void checkStoragePermissions(){
+//        if (ContextCompat.checkSelfPermission(ListPOIActivity.this,
+//                android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+//                != PackageManager.PERMISSION_GRANTED) {
+//
+//
+//            // No explanation needed, we can request the permission.
+//
+//            ActivityCompat.requestPermissions(ListPOIActivity.this,
+//                    new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE},
+//                    3);
+//
+//
+//        }
+//
+//    }
+
     /**
      * Method to make JSON array request where response starts with '[' .
      * @param urlJsonArry : The string containing the JSON array returned by the web request
@@ -148,10 +233,10 @@ public class ListPOIActivity extends ListActivity {
                                 JSONObject person = (JSONObject) response
                                         .get(i);
 
-                                String name = person.getString("name");
+                                String name = person.getString("poiName");
 
                                 String description = person.getString("description");
-                                String id = person.getString("id");
+                                String id = person.getString("poiID");
                                 POI newPOI;
                                 try {
                                     newPOI = new POI(Integer.parseInt(id));

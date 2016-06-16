@@ -4,13 +4,19 @@ import android.app.Dialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -80,6 +86,11 @@ public class POIDescription extends ListActivity {
     private TextView poiLocationTextView;
     private Button navigateButton;
 
+    //String[] arNames;
+
+    ArrayList<String> arNames_al = new ArrayList<String>();
+    ArrayList<Integer> arID_al = new ArrayList<Integer>();
+
     /**
      * The URL for the details of the selected POI.
      */
@@ -112,6 +123,8 @@ public class POIDescription extends ListActivity {
             public void onClick(final View v) {
                 Intent intent = new Intent(POIDescription.this, MainActivity.class);
                 intent.putExtra("poi_id", poiID);
+                intent.putStringArrayListExtra("ar_names", arNames_al);
+                intent.putIntegerArrayListExtra("ar_ids", arID_al);
                 displayToast("ID: " + poiID);
                 intent.putExtra("poi_name", poiName);
                 intent.putExtra("poi_description", poiDescription);
@@ -124,29 +137,31 @@ public class POIDescription extends ListActivity {
     @Override
     protected void onListItemClick(final ListView l, final View v, final int position, final long id) {
 
-        final Dialog dialog = new Dialog(POIDescription.this);
-        dialog.setContentView(R.layout.dialog_ar_details);
-        dialog.setTitle("Title...");
 
-        TextView text1 = (TextView) dialog.findViewById(R.id.textview_artwork);
-        TextView text2 = (TextView) dialog.findViewById(R.id.textview_description);
-        TextView text3 = (TextView) dialog.findViewById(R.id.textview_artist);
-        Button ok = (Button) dialog.findViewById(R.id.buttonOK);
-
-        ok.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                dialog.dismiss();
-            }
-        });
-        String item = (String) getListAdapter().getItem(position);
-
-        text1.setText(arList.get(position).getARName());
-        text2.setText(arList.get(position).getDescription());
-        //text3.setText(arList.get(position).getArtistID());
-        text3.setText("John Mayers");
-        dialog.show();
+        populateDialogOnItemClick(position);
+//        final Dialog dialog = new Dialog(POIDescription.this);
+//        dialog.setContentView(R.layout.dialog_ar_details);
+//        dialog.setTitle("Title...");
+//
+//        TextView text1 = (TextView) dialog.findViewById(R.id.textview_artwork);
+//        TextView text2 = (TextView) dialog.findViewById(R.id.textview_description);
+//        TextView text3 = (TextView) dialog.findViewById(R.id.textview_artist);
+//        Button ok = (Button) dialog.findViewById(R.id.buttonOK);
+//
+//        ok.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//
+//                dialog.dismiss();
+//            }
+//        });
+//        String item = (String) getListAdapter().getItem(position);
+//
+//        text1.setText(arList.get(position).getARName());
+//        text2.setText(arList.get(position).getDescription());
+//        //text3.setText(arList.get(position).getArtistID());
+//        text3.setText(arList.get(position).getArtistID());
+//        dialog.show();
         //Toast.makeText(this, arList.get(position).getArtistID() + " selected", Toast.LENGTH_LONG).show();
     }
 
@@ -158,8 +173,8 @@ public class POIDescription extends ListActivity {
 
         makeJsonObjectRequest(POIS_URL + poiID);
 
-        displayToast(POIS_URL   + poiID+"/ar");
-        makeJsonArrayRequest(POIS_URL   + poiID+"/ar");
+        displayToast(POIS_URL + poiID + "/ar");
+        makeJsonArrayRequest(POIS_URL + poiID + "/ar");
         new DownloadFileFromURL().execute(markerFile);
 
     }
@@ -193,6 +208,8 @@ public class POIDescription extends ListActivity {
                             String jsonResponse = "";
                             String[] arNames = new String[response.length()];
                             numElements = response.length();
+                            arNames_al = new ArrayList<String>();
+                            arID_al = new ArrayList<Integer>();
                             for (int i = 0; i < response.length(); i++) {
 
                                 JSONObject ar = (JSONObject) response
@@ -206,6 +223,8 @@ public class POIDescription extends ListActivity {
                                 try {
                                     newAR = new ARContent(id);
                                     arNames[i] = name;
+                                    arNames_al.add(name);
+                                    arID_al.add(id);
                                     newAR.setARName(name);
                                     newAR.setDescription(description);
                                     newAR.setArtistID(artistID);
@@ -241,7 +260,7 @@ public class POIDescription extends ListActivity {
 
     }
     /**
-     * Method to make json object request where json response starts wtih {
+     * Method to make json object request where json response starts with {
      * */
     private void makeJsonObjectRequest(String urlJsonObj) {
 
@@ -261,13 +280,6 @@ public class POIDescription extends ListActivity {
                     String description = response.getString("description");
                     String address = response.getString("address");
                     String markerLocation = response.getString("markerLocation");
-
-//                    String jsonResponse = "";
-//                    jsonResponse += "Name: " + name + "\n\n";
-//                    jsonResponse += "Email: " + description + "\n\n";
-//                    jsonResponse += "Address: " + address + "\n\n";
-//                    jsonResponse += "Mobile: " + markerLocation + "\n\n";
-
                     populateUI(name, description, address);
 
 
@@ -296,12 +308,105 @@ public class POIDescription extends ListActivity {
     }
 
 
+    /**
+     * Method to make json object request where json response starts with {
+     * */
+    private void populateDialogOnItemClick(final int position) {
+
+        showpDialog();
+        String artistURL = "http://ec2-54-209-186-152.compute-1.amazonaws.com:7001/v1/user/"+arList.get(position).getArtistID();
+        JsonObjectRequest jsonObjReq = new JsonObjectRequest(Request.Method.GET,
+                artistURL, null, new Response.Listener<JSONObject>() {
+
+            @Override
+            public void onResponse(JSONObject response) {
+                Log.d(TAG, response.toString());
+
+                try {
+                    // Parsing json object response
+                    // response will be a json object
+                    String first_name = response.getString("firstname");
+                    String last_name = response.getString("lastname");
+                    //populateUI(name, description, address);
+                    final Dialog dialog = new Dialog(POIDescription.this);
+                    dialog.setContentView(R.layout.dialog_ar_details);
+                    dialog.setTitle("Title...");
+
+                    TextView text1 = (TextView) dialog.findViewById(R.id.textview_artwork);
+                    TextView text2 = (TextView) dialog.findViewById(R.id.textview_description);
+                    TextView text3 = (TextView) dialog.findViewById(R.id.textview_artist);
+                    ImageView imgView = (ImageView)dialog.findViewById(R.id.image_preview);
+
+
+
+                    Button ok = (Button) dialog.findViewById(R.id.buttonOK);
+
+
+
+                    ok.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+
+                            dialog.dismiss();
+                        }
+                    });
+                    String item = (String) getListAdapter().getItem(position);
+
+                    text1.setText(arList.get(position).getARName());
+                    text2.setText(arList.get(position).getDescription());
+                    //text3.setText(arList.get(position).getArtistID());
+                    text3.setText(first_name + " " + last_name);
+
+                    new FetchImageFromURL(imgView).execute("https://s3.amazonaws.com/testarbucket/resources/images/treesBlue422a8f41-526e-4ac0-86e2-c5f53cde4912.png");
+                    dialog.show();
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    Toast.makeText(getApplicationContext(),
+                            "Error: " + e.getMessage(),
+                            Toast.LENGTH_LONG).show();
+                }
+                hidepDialog();
+            }
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.d(TAG, "Error: " + error.getMessage());
+                Toast.makeText(getApplicationContext(),
+                        error.getMessage(), Toast.LENGTH_SHORT).show();
+                // hide the progress dialog
+                hidepDialog();
+            }
+        });
+
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(jsonObjReq);
+    }
+
     public void populateUI(String poiName, String poiDescription, String poiLocation)
     {
         poiNameTextView.setText(poiName);
         poiDescriptionTextView.setText(poiDescription);
         poiLocationTextView.setText(poiLocation);
         //String[] pois = {"AR1", "AR2", "AR3"};
+
+    }
+
+    public void checkStoragePermissions(){
+        if (ContextCompat.checkSelfPermission(POIDescription.this,
+                android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+
+            // No explanation needed, we can request the permission.
+
+            ActivityCompat.requestPermissions(POIDescription.this,
+                    new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    3);
+
+
+        }
 
     }
 
@@ -416,5 +521,31 @@ public class POIDescription extends ListActivity {
             //my_image.setImageDrawable(Drawable.createFromPath(imagePath));
         }
 
+    }
+
+
+    private class FetchImageFromURL extends AsyncTask<String, Void, Bitmap> {
+        ImageView bmImage;
+
+        public FetchImageFromURL(ImageView bmImage) {
+            this.bmImage = bmImage;
+        }
+
+        protected Bitmap doInBackground(String... urls) {
+            String urldisplay = urls[0];
+            Bitmap mIcon11 = null;
+            try {
+                InputStream in = new java.net.URL(urldisplay).openStream();
+                mIcon11 = BitmapFactory.decodeStream(in);
+            } catch (Exception e) {
+                Log.e("Error", e.getMessage());
+                e.printStackTrace();
+            }
+            return mIcon11;
+        }
+
+        protected void onPostExecute(Bitmap result) {
+            bmImage.setImageBitmap(result);
+        }
     }
 }
