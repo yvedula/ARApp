@@ -18,11 +18,7 @@ function $_GET(param) {
 
 var ar_id = $_GET('arid');
 var poi_id = $_GET('poiid');
-		    var xmlHttp = new XMLHttpRequest();
-            xmlHttp.open( "GET", "http://ec2-54-209-186-152.compute-1.amazonaws.com:7001/v1/pois/"+poi_id+"/ar/"+ar_id, false ); // false for synchronous request
-            xmlHttp.send( null );
-            var res1 = xmlHttp.responseText;
-            var obj = JSON.parse(res1);
+var imageName = $_GET('file');
 
 var World = {
 	loaded: false,
@@ -60,7 +56,7 @@ var World = {
 		*/
 
 		/* Create overlay for page one */
-        var imgOne = new AR.ImageResource("file:///storage/emulated/0/ar_images/ar_image.jpg");
+        var imgOne = new AR.ImageResource("file:///storage/emulated/0/ar_images/"+imageName);
 
 		var overlayOne = new AR.ImageDrawable(imgOne, 3, {
 			offsetX: -0.15,
@@ -88,7 +84,7 @@ var World = {
 		document.getElementById('loadingMessage').innerHTML =
 			"<div" + cssDivLeft + ">Scan Target &#35;1 (surfer):</div>" +
 //			"<div" + cssDivRight + "><img src='assets/surfer.png'></img></div>";
-"<div" + cssDivRight + "><img src='file:///storage/emulated/0/ar_images/ar_image.jpg'></img></div>";
+"<div" + cssDivRight + "><img src='file:///storage/emulated/0/ar_images/'"+imageName+"></img></div>";
 
 
 		// Remove Scan target message after 10 sec.

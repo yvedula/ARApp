@@ -10,6 +10,7 @@ public class ARContent {
     private String description;
     private String artistID;
     private int id;
+    private String imgURL;
 
     public ARContent(int id) {
         this.id = id;
@@ -47,4 +48,13 @@ public class ARContent {
     public void setID(int id) {
         this.id = id;
     }
+
+    public void setImageURL(String imgURL){
+        this.imgURL = imgURL;
+        }
+
+    public String getImageURL() {
+        return imgURL;
+    }
+
 }

@@ -96,6 +96,10 @@ public class POIDescription extends ListActivity {
      */
     public static final String POIS_URL = "http://ec2-54-209-186-152.compute-1.amazonaws.com:7001/v1/pois/";
 
+    /**
+     *
+     * TODO This is hardcoded. Has to be fetched from the server.
+     */
     String markerFile = "https://s3.amazonaws.com/testarbucket/resources/markers/magazine.wtc";
     public static final String TAG = "POIDescription";
     @Override
@@ -219,6 +223,7 @@ public class POIDescription extends ListActivity {
                                 String description = ar.getString("description");
                                 String artistID = ar.getString("userID");
                                 int id = Integer.parseInt(ar.getString("arID"));
+                                String imageURL = ar.getString("storageLocation");
                                 ARContent newAR;
                                 try {
                                     newAR = new ARContent(id);
@@ -228,6 +233,7 @@ public class POIDescription extends ListActivity {
                                     newAR.setARName(name);
                                     newAR.setDescription(description);
                                     newAR.setArtistID(artistID);
+                                    newAR.setImageURL(imageURL);
                                     arList.add(newAR);
                                     ArrayAdapter<String> adapter = new ArrayAdapter<String>(POIDescription.this, android.R.layout.simple_list_item_1, arNames);
                                     setListAdapter(adapter);
@@ -356,8 +362,10 @@ public class POIDescription extends ListActivity {
                     text2.setText(arList.get(position).getDescription());
                     //text3.setText(arList.get(position).getArtistID());
                     text3.setText(first_name + " " + last_name);
-
-                    new FetchImageFromURL(imgView).execute("https://s3.amazonaws.com/testarbucket/resources/images/treesBlue422a8f41-526e-4ac0-86e2-c5f53cde4912.png");
+                    //displayToast(arList.get(position).getImageURL());
+                    showpDialog();
+                    new FetchImageFromURL(imgView).execute(arList.get(position).getImageURL());
+                    hidepDialog();
                     dialog.show();
 
                 } catch (JSONException e) {
@@ -525,6 +533,7 @@ public class POIDescription extends ListActivity {
 
 
     private class FetchImageFromURL extends AsyncTask<String, Void, Bitmap> {
+
         ImageView bmImage;
 
         public FetchImageFromURL(ImageView bmImage) {

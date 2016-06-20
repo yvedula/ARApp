@@ -57,6 +57,8 @@ import java.util.Random;
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
+    public String imgToBeDownloaded;
+    public int lengthOfURL = 55;
     /**
      * The view for the Wikitude camera feed.
      */
@@ -282,9 +284,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public void viewAR(int id){
         try {
 
-            //new DownloadImage().execute(imageToRender);
+            new DownloadImage().execute(imageToRender);
 
-            architectView.load("file:///android_asset/2D_rendering/index.html?id="+id);
+            architectView.load("file:///android_asset/2D_rendering/index.html?id="+id+"&file="+imgToBeDownloaded.substring(lengthOfURL));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -583,7 +585,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         protected Bitmap doInBackground(String... URL) {
 
             String imageURL = URL[0];
-
+            imgToBeDownloaded = imageURL;
             Bitmap bitmap = null;
             try {
                 // Download Image from URL
@@ -600,7 +602,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         protected void onPostExecute(Bitmap result) {
             // Set the bitmap into ImageView
             //image.setImageBitmap(result);
-            saveImageToFile("ar_image", result);
+            String filename = imgToBeDownloaded.substring(lengthOfURL);
+            Log.d("IMGURL", filename);
+            saveImageToFile(filename, result);
             displayToast("Image Downloaded!");
             // Close progressdialog
             mProgressDialog.dismiss();
@@ -615,7 +619,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         Random generator = new Random();
 //        int n = 10000;
 //        n = generator.nextInt(n);
-        String fname = fileName +".jpg";
+        String fname = fileName;
         File file = new File (myDir, fname);
 
         Log.d("IMG", file.getAbsolutePath());
