@@ -59,7 +59,8 @@ public class ListPOIActivity extends ListActivity {
      * The URL for the web service with the list of all POIs.
      */
     //public static final String POIS_URL = "https://example.wikitude.com/GetSamplePois/";
-    public static final String POIS_URL = "http://ec2-54-209-186-152.compute-1.amazonaws.com:7001/v1/pois";
+    //public static final String POIS_URL = "http://ec2-54-209-186-152.compute-1.amazonaws.com:7001/v1/pois";
+    public static final String POIS_URL = "http://placmakarapi.cf:7001/v1/pois/";
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
