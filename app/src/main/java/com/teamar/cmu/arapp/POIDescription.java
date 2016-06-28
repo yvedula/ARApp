@@ -94,7 +94,9 @@ public class POIDescription extends ListActivity {
     /**
      * The URL for the details of the selected POI.
      */
-    public static final String POIS_URL = "http://ec2-54-209-186-152.compute-1.amazonaws.com:7001/v1/pois/";
+    //public static final String POIS_URL = "http://ec2-54-209-186-152.compute-1.amazonaws.com:7001/v1/pois/";
+
+    public static final String POIS_URL = "http://placmakarapi.cf:7001/v1/pois/";
 
     /**
      *

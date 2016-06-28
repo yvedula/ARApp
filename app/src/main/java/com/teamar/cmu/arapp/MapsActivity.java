@@ -1,6 +1,7 @@
 package com.teamar.cmu.arapp;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
@@ -25,6 +26,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener {
 
@@ -37,6 +39,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private ProgressDialog pDialog;
 
     public static final String POIS_URL = "http://placmakarapi.cf:7001/v1/pois/";
+
+    HashMap<String, POI> markersAndPOIs = new HashMap<String, POI>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,39 +59,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
-    public void retrievePOIs(){
-
-        //Defining parameters for POI-1
-        int id1 = 1;
-        String name1 = "Fence";
-        String description1 = "Painted thing";
-        double lat1 = 40.442254;
-        double lon1 = -79.943441;
-        //Loading the parameters into POI-1
-        POI newPOI1 = new POI(id1);
-        newPOI1.setPoiName(name1);
-        newPOI1.setDescription(description1);
-        newPOI1.setLatitude(lat1);
-        newPOI1.setLongitude(lon1);
-        poisList.add(newPOI1);
-
-        //Defining parameters for POI-2
-        int id2 = 2;
-        String name2 = "Hunt Library";
-        String description2 = "Largest Library";
-        double lat2 = 40.441132;
-        double lon2 = -79.943707;
-        //Loading the parameters into POI-1
-        POI newPOI2 = new POI(id2);
-        newPOI2.setPoiName(name2);
-        newPOI2.setDescription(description2);
-        newPOI2.setLatitude(lat2);
-        newPOI2.setLongitude(lon2);
-        poisList.add(newPOI2);
-
-
-    }
-
     public void loadMap(GoogleMap googleMap) {
         mMap = googleMap;
 
@@ -98,7 +69,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         for (int i = 0; i < numOfPOIs; i++) {
             POI currentPOI = poisList.get(i);
             final LatLng mapMarker = new LatLng(currentPOI.getLatitude(), currentPOI.getLongitude());
-            mMap.addMarker(new MarkerOptions().position(mapMarker).title(currentPOI.getPoiName()).snippet(currentPOI.getDescription()));
+
+            Marker m = mMap.addMarker(new MarkerOptions().position(mapMarker).title(currentPOI.getPoiName()).snippet(currentPOI.getDescription()));
+            markersAndPOIs.put(m.getId(), currentPOI);
             mMap.moveCamera(CameraUpdateFactory.newLatLng(mapMarker));
             mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
                 @Override
@@ -166,7 +139,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Getting the position from the marker
         final LatLng latLng = marker.getPosition();
 
-        Toast.makeText(MapsActivity.this, latLng.latitude+"", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(MapsActivity.this, markersAndPOIs.get(marker.getId()).getPoiID()+"", Toast.LENGTH_SHORT).show();
+        int poiID = markersAndPOIs.get(marker.getId()).getPoiID();
+        Intent intent = new Intent(this, POIDescription.class);
+        intent.putExtra("poi_id", poiID);
+        startActivity(intent);
     }
 
 
