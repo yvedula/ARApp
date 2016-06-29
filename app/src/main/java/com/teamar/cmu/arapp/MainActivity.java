@@ -207,7 +207,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
 
                 int selected_ar = intent.getIntegerArrayListExtra("ar_ids").get(position);
-                String url_1 = "http://ec2-54-209-186-152.compute-1.amazonaws.com:7001/v1/pois/" + poi_id + "/ar/" + selected_ar;
+                String url_1 = "http://placmakarapi.cf:7001/v1/pois/" + poi_id + "/ar/" + selected_ar;
                 Log.d("URL_1", url_1);
                 getImageURL(url_1);
 
@@ -215,7 +215,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 //                displayToast(url);
                 dialog.dismiss();
 
-                viewAR(intent.getIntegerArrayListExtra("ar_ids").get(position));
+                //viewAR(intent.getIntegerArrayListExtra("ar_ids").get(position));
+                interactAR();
             }
         });
 
@@ -292,6 +293,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
     }
 
+
+    public void interactAR()
+    {
+        try {
+
+            architectView.load("file:///android_asset/interact/index.html");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode,

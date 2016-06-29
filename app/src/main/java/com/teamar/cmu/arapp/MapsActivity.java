@@ -112,6 +112,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             });
 
         }
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(40.443271, -79.942859), 16.0f));
+
     }
     @Override
     public void onMapReady(GoogleMap googleMap) {

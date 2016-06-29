@@ -322,7 +322,7 @@ public class POIDescription extends ListActivity {
     private void populateDialogOnItemClick(final int position) {
 
         showpDialog();
-        String artistURL = "http://ec2-54-209-186-152.compute-1.amazonaws.com:7001/v1/user/"+arList.get(position).getArtistID();
+        String artistURL = "http://placmakarapi.cf:7001/v1/user/"+arList.get(position).getArtistID();
         JsonObjectRequest jsonObjReq = new JsonObjectRequest(Request.Method.GET,
                 artistURL, null, new Response.Listener<JSONObject>() {
 
@@ -348,7 +348,6 @@ public class POIDescription extends ListActivity {
 
 
                     Button ok = (Button) dialog.findViewById(R.id.buttonOK);
-
 
 
                     ok.setOnClickListener(new View.OnClickListener() {
